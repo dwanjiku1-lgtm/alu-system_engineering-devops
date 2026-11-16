@@ -1,15 +1,19 @@
 #!/usr/bin/env bash
 # Configure Nginx to run as the 'nginx' user and listen on port 8080
 
-# 1. Change user from www-data to nginx in nginx.conf
+# 1. Stop nginx completely to clear active processes
+service nginx stop
+
+# 2. Update user directive in nginx.conf
 sed -i 's/user www-data;/user nginx;/g' /etc/nginx/nginx.conf
 
-# 2. Change port 80 to 8080 in the default site configuration (both IPv4 and IPv6)
+# 3. Update port to 8080 in the default site configuration (both IPv4 and IPv6)
 sed -i 's/listen 80;/listen 8080;/g' /etc/nginx/sites-enabled/default
 sed -i 's/listen \[::\]:80;/listen [::]:8080;/g' /etc/nginx/sites-enabled/default
 
-# 3. Fix log directory permissions so the 'nginx' user can write to logs
+# 4. Ensure the nginx user owns the log files/directories
 chown -R nginx:nginx /var/log/nginx
+chown -R nginx:nginx /var/lib/nginx
 
-# 4. Restart Nginx to apply changes
-service nginx restart
+# 5. Start nginx back up
+service nginx start
